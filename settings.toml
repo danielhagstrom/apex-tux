@@ -1,7 +1,7 @@
 [interval]
 # The interval at which the screen should automatically change
 # set to 0 if you don't want it to change automatically
-refresh=45
+refresh=10
 
 [clock]
 enabled = true
@@ -12,19 +12,20 @@ enabled = true
 # twelve_hour = false
 
 [mpris2]
-enabled = true
+enabled = false
 # Set this so web browsers like Firefox or Chrome don't steal the focus of your real music player
 # You can check what to put here by using tools like D-Feet
 # preferred_player = "Lollypop"
+preferred_player = "Spotify"
 
 [coindesk]
-enabled = true
+enabled = false
 # Valid choices are "gbp", "usd" and "eur"
 # Default is USD
 currency = "eur"
 
 [sysinfo]
-enabled = true
+enabled = false
 # The polling interval for system stats in milliseconds.
 polling_interval = 1500
 # The maximum value for the net I/O stat bar (in MiB), used for scaling its fill
@@ -45,7 +46,7 @@ enabled = true
 # /!\
 # Please note that it is a relative path, so once compiled, please 
 # copy the images folder to the current directory
-path = "images/sample_1.gif"
+path = "sample.gif"
 # This only works if the image feature is passed in the build instructions
 # It supports all those formats : https://github.com/image-rs/image/tree/8824ab3375ddab0fd3429fe3915334523d50c532#supported-image-formats
 # (even in color, but it will only display in black and white)
