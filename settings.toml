@@ -19,6 +19,10 @@ priority = 1
 # preferred_player = "Lollypop"
 preferred_player = "spotify"
 
+[notifications]
+# Minimum time, in seconds, to show a notification on the OLED.
+display_seconds = 5
+
 [coindesk]
 enabled = false
 # Valid choices are "gbp", "usd" and "eur"

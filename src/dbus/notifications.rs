@@ -23,14 +23,19 @@ use linkme::distributed_slice;
 use log::{debug, info};
 use std::{convert::TryFrom, sync::LazyLock, time::Duration};
 use tinybmp::Bmp;
+use config::Config;
 
 #[distributed_slice(NOTIFICATION_PROVIDERS)]
-static PROVIDER_INIT: fn() -> Result<Box<dyn NotificationWrapper>> = register_callback;
+static PROVIDER_INIT: fn(&Config) -> Result<Box<dyn NotificationWrapper>> = register_callback;
 
 #[allow(clippy::unnecessary_wraps)]
-fn register_callback() -> Result<Box<dyn NotificationWrapper>> {
+fn register_callback(config: &Config) -> Result<Box<dyn NotificationWrapper>> {
     info!("Registering DBUS notification source.");
-    let dbus = Box::new(Dbus {});
+    let display_seconds = config
+        .get_int("notifications.display_seconds")
+        .unwrap_or(2)
+        .max(1) as u32;
+    let dbus = Box::new(Dbus { display_seconds });
     Ok(dbus)
 }
 
@@ -39,7 +44,9 @@ static DISCORD_ICON: &[u8] = include_bytes!("./../../assets/discord.bmp");
 static DISCORD_ICON_BMP: LazyLock<Bmp<'static, BinaryColor>> =
     LazyLock::new(|| Bmp::<BinaryColor>::from_slice(DISCORD_ICON).expect("Failed to parse BMP"));
 
-pub struct Dbus {}
+pub struct Dbus {
+    display_seconds: u32,
+}
 
 enum NotificationType {
     Discord { title: String, content: String },
@@ -47,7 +54,7 @@ enum NotificationType {
 }
 
 impl NotificationType {
-    pub fn render(&self) -> Result<Notification> {
+    pub fn render(&self, display_seconds: u32) -> Result<Notification> {
         let builder = NotificationBuilder::new();
 
         match self {
@@ -57,6 +64,7 @@ impl NotificationType {
                     .with_icon(icon)
                     .with_content(content)
                     .with_title(title)
+                    .with_display_seconds(display_seconds)
                     .build()
             }
             NotificationType::Unsupported => Err(anyhow!("Unsupported notification type!")),
@@ -75,10 +83,11 @@ impl TryFrom<Message> for NotificationType {
                 let (_, _, _, title, content) =
                     value.read5::<String, u32, String, String, String>()?;
                 if let Some(MessageItem::Dict(dict)) = value.get_items().get(6) {
-                    if let Some((MessageItem::Str(key), _)) = dict.last() {
-                        if key != "sender-pid" {
-                            return Ok(NotificationType::Unsupported);
-                        }
+                    let has_sender_pid = dict.iter().any(|(key, _)| {
+                        matches!(key, MessageItem::Str(key) if key == "sender-pid")
+                    });
+                    if !has_sender_pid {
+                        return Ok(NotificationType::Unsupported);
                     }
                 }
 
@@ -159,7 +168,7 @@ impl NotificationProvider for Dbus {
                 if let NotificationType::Unsupported = &ty {
                     continue;
                 }
-                if let Ok(notif) = ty.render() {
+                if let Ok(notif) = ty.render(self.display_seconds) {
                     yield notif;
                 }
             }

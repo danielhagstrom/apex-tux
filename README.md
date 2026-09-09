@@ -151,6 +151,15 @@ polling_interval = 1000
 The provider keeps the last successfully read value if the file is temporarily
 unavailable. Additional lines beyond the first four are ignored.
 
+### Notifications
+
+Notification display time can be configured in seconds. Longer notification
+titles may remain visible longer while they scroll.
+
+```toml
+[notifications]
+display_seconds = 5
+```
 
 ## Usage
 
