@@ -130,6 +130,15 @@ In our case we need to set a right value for the sensor(`acpitz temp1`, critical
 
 You can set your default media player on the `[mpris2]` section.
 
+### Notifications
+
+Notification display time can be configured in seconds. Longer notification
+titles may remain visible longer while they scroll.
+
+```toml
+[notifications]
+display_seconds = 5
+```
 
 ## Usage
 

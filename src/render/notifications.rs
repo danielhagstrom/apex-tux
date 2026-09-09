@@ -50,6 +50,7 @@ pub struct NotificationBuilder<'a> {
     content: Option<String>,
     icon: Option<Icon<'a>>,
     font: Option<&'a MonoFont<'a>>,
+    display_seconds: u32,
 }
 
 pub trait NotificationProvider {
@@ -115,6 +116,11 @@ impl<'a> NotificationBuilder<'a> {
         self
     }
 
+    pub fn with_display_seconds(mut self, display_seconds: u32) -> Self {
+        self.display_seconds = display_seconds.max(1);
+        self
+    }
+
     fn title(&self) -> &'a str {
         self.title.unwrap_or("Notification")
     }
@@ -161,7 +167,7 @@ impl<'a> NotificationBuilder<'a> {
             0
         };
 
-        (TICKS_PER_SECOND + scroll_time + TICKS_PER_SECOND).as_()
+        (self.display_seconds as usize * TICKS_PER_SECOND + scroll_time).as_()
     }
 
     pub fn build(self) -> Result<Notification> {
