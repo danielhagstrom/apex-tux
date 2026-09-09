@@ -34,7 +34,8 @@ pub const TICKS_PER_SECOND: usize = 1000 / TICK_LENGTH;
 pub static CONTENT_PROVIDERS: [fn(&Config) -> Result<Box<dyn ContentWrapper>>] = [..];
 
 #[distributed_slice]
-pub static NOTIFICATION_PROVIDERS: [fn() -> Result<Box<dyn NotificationWrapper>>] = [..];
+pub static NOTIFICATION_PROVIDERS:
+    [fn(&Config) -> Result<Box<dyn NotificationWrapper>>] = [..];
 
 pub trait NotificationWrapper {
     fn proxy_stream<'a>(&'a mut self) -> Result<Box<dyn Stream<Item = Result<Notification>> + 'a>>;
@@ -102,7 +103,7 @@ impl<'a, T: 'a + AsyncDevice> Scheduler<'a, T> {
 
         let mut notifications = NOTIFICATION_PROVIDERS
             .iter()
-            .map(|f| (f)())
+            .map(|f| (f)(&config))
             .collect::<Result<Vec<_>>>()?;
 
         let (notifications, errors): (Vec<_>, Vec<_>) = notifications
