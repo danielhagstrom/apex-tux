@@ -17,6 +17,10 @@ enabled = true
 # You can check what to put here by using tools like D-Feet
 # preferred_player = "Lollypop"
 
+[notifications]
+# Minimum time, in seconds, to show a notification on the OLED.
+display_seconds = 5
+
 [coindesk]
 enabled = true
 # Valid choices are "gbp", "usd" and "eur"
